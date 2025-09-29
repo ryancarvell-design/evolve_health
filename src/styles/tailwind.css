@@ -1,0 +1,661 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Add CSS layer for sidebar interaction fixes */
+@layer utilities {
+  .sidebar-interactive {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    contain: layout style !important;
+    isolation: isolate !important;
+  }
+
+  .editor-contained {
+    contain: layout style paint !important;
+    isolation: isolate !important;
+    will-change: transform !important;
+  }
+
+  .prevent-event-capture {
+    pointer-events: none !important;
+  }
+
+  .force-event-capture {
+    pointer-events: auto !important;
+  }
+
+  /* Fix for document editor layout interference */
+  .document-editor-main {
+    contain: layout !important;
+    isolation: isolate !important;
+  }
+
+  .document-editor-main > * {
+    isolation: auto !important;
+  }
+
+  /* Ensure sidebar buttons remain clickable */
+  .sidebar-button {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+}
+
+/* Enhanced Sidebar Protection and Layout Isolation */
+.document-editor-container {
+  /* Create a new stacking context to isolate sidebar issues */
+  position: relative;
+  isolation: isolate;
+}
+
+/* Sidebar protection utilities */
+.sidebar-protection {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 10000;
+  background: transparent;
+}
+
+.sidebar-protection.active {
+  pointer-events: auto;
+}
+
+/* Enhanced containment for layout isolation */
+.editor-content-container {
+  contain: layout style paint;
+  isolation: isolate;
+  position: relative;
+}
+
+/* Prevent sidebar overlap interference */
+.document-canvas-area {
+  /* Ensure content stays within bounds and doesn't interfere with sidebar */
+  max-width: calc(100vw - var(--sidebar-width, 240px));
+  contain: layout style;
+}
+
+/* Modal and overlay z-index management */
+.modal-overlay-base { z-index: 2000; }
+.modal-overlay-high { z-index: 2500; }
+.toast-overlay { z-index: 3000; }
+.sidebar-overlay { z-index: 10000; }
+
+/* Sidebar interaction protection */
+.sidebar-interactive {
+  /* Force sidebar to stay interactive */
+  pointer-events: auto !important;
+  touch-action: auto !important;
+}
+
+.sidebar-interactive * {
+  pointer-events: auto !important;
+}
+
+/* Prevent main content from interfering with sidebar */
+.main-content-isolated {
+  isolation: isolate;
+  contain: layout style;
+  position: relative;
+}
+
+/* Enhanced sidebar clickability */
+.sidebar-clickable {
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.sidebar-clickable button {
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Layout containment for editor components */
+.editor-component-isolated {
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+/* Prevent event capture issues */
+.no-pointer-capture {
+  pointer-events: none;
+}
+
+.restore-pointer-events {
+  pointer-events: auto;
+}
+
+/* Healthcare Theme CSS Variables - Deep Navy, Emerald Green & Gold (Landing Page Colors) */
+:root {
+  /* Primary Healthcare Colors - Deep Navy (from landing page) */
+  --color-primary: #1E3A5F; /* deep-navy - matches landing page gradient */
+  --color-primary-foreground: #ffffff;
+  
+  /* Secondary Colors - Slate (from landing page) */
+  --color-secondary: #475569; /* slate-600 - matches landing page */
+  --color-secondary-foreground: #ffffff;
+  
+  /* Accent Colors - Emerald Green (from landing page) */
+  --color-accent: #10B981; /* emerald-500 - matches landing page */
+  --color-accent-foreground: #ffffff;
+  
+  /* Background & Surfaces (from landing page palette) */
+  --color-background: #f8fafc; /* gray-50 - matches landing page light sections */
+  --color-foreground: #1E293B; /* slate-800 - matches landing page text */
+  --color-card: #ffffff;
+  --color-card-foreground: #1E293B; /* slate-800 */
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1E293B; /* slate-800 */
+  
+  /* Muted Colors (from landing page palette) */
+  --color-muted: #f1f5f9; /* slate-100 - matches landing page */
+  --color-muted-foreground: #64748b; /* slate-500 - matches landing page */
+  
+  /* Border & Input (from landing page palette) */
+  --color-border: #e2e8f0; /* slate-200 - matches landing page */
+  --color-input: #ffffff;
+  --color-ring: #10B981; /* emerald-500 - matches landing page focus states */
+  
+  /* Status Colors (from landing page accent palette) */
+  --color-success: #10B981; /* emerald-500 - matches landing page */
+  --color-success-foreground: #ffffff;
+  --color-warning: #F59E0B; /* amber-500/gold - matches landing page */
+  --color-warning-foreground: #ffffff;
+  --color-error: #dc2626; /* red-600 */
+  --color-error-foreground: #ffffff;
+  --color-destructive: #dc2626; /* red-600 */
+  --color-destructive-foreground: #ffffff;
+}
+
+/* Dark mode healthcare theme (matches landing page dark sections) */
+.dark {
+  --color-primary: #1E3A5F; /* deep-navy - consistent with light mode */
+  --color-primary-foreground: #ffffff;
+  
+  --color-secondary: #475569; /* slate-600 */
+  --color-secondary-foreground: #f8fafc; /* slate-50 */
+  
+  --color-accent: #10b981; /* emerald-500 */
+  --color-accent-foreground: #ffffff;
+  
+  /* Dark backgrounds matching landing page gradient */
+  --color-background: #0f172a; /* slate-900 - matches landing page dark gradient */
+  --color-foreground: #f8fafc; /* slate-50 */
+  --color-card: #1e293b; /* slate-800 - matches landing page dark sections */
+  --color-card-foreground: #f8fafc; /* slate-50 */
+  --color-popover: #1e293b; /* slate-800 */
+  --color-popover-foreground: #f8fafc; /* slate-50 */
+  
+  --color-muted: #334155; /* slate-700 */
+  --color-muted-foreground: #cbd5e1; /* slate-300 */
+  
+  --color-border: #334155; /* slate-700 */
+  --color-input: #1e293b; /* slate-800 */
+  --color-ring: #10B981; /* emerald-500 - consistent accent */
+  
+  --color-success: #10b981; /* emerald-500 */
+  --color-success-foreground: #ffffff;
+  --color-warning: #f59e0b; /* amber-500/gold */
+  --color-warning-foreground: #ffffff;
+  --color-error: #ef4444; /* red-500 */
+  --color-error-foreground: #ffffff;
+  --color-destructive: #ef4444; /* red-500 */
+  --color-destructive-foreground: #ffffff;
+}
+
+/* Toast Animation Styles */
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.animate-shrink {
+  animation: shrink var(--duration) linear forwards;
+}
+
+/* Clinical Transition for consistent UX */
+.transition-clinical {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Loading Animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Drag and Drop Enhancements */
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Writing mode for vertical text */
+.writing-mode-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Responsive Grid Utilities */
+@layer components {
+  .grid-responsive {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+  }
+  
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 lg:grid-cols-2 gap-6;
+  }
+  
+  .grid-responsive-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6;
+  }
+
+  /* Mobile-First Form Layouts */
+  .form-group {
+    @apply flex flex-col space-y-2 mb-4;
+  }
+  
+  .form-row {
+    @apply flex flex-col sm:flex-row sm:space-x-4 sm:space-y-0 space-y-4;
+  }
+  
+  .form-row .form-group {
+    @apply flex-1 mb-0;
+  }
+
+  /* Mobile-Optimized Cards */
+  .card-mobile {
+    @apply bg-card border border-border rounded-lg p-4 sm:p-6;
+  }
+
+  /* Responsive Text */
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  /* Shadow Utilities */
+  .shadow-clinical {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-clinical-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Button Loading State */
+  .btn-loading {
+    @apply opacity-75 cursor-not-allowed;
+  }
+  
+  .btn-loading::after {
+    content: '';
+    @apply absolute inset-0 bg-white/20 rounded;
+  }
+
+  /* Table Responsive */
+  .table-responsive {
+    @apply min-w-full overflow-x-auto;
+  }
+  
+  .table-responsive table {
+    @apply w-full text-sm;
+  }
+  
+  /* Mobile Table Stacking */
+  @media (max-width: 640px) {
+    .table-mobile tbody tr {
+      @apply block border border-border rounded-lg mb-4 p-4;
+    }
+    
+    .table-mobile tbody td {
+      @apply block text-right border-none py-2;
+      border: none !important;
+    }
+    
+    .table-mobile tbody td::before {
+      content: attr(data-label) ': ';
+      @apply float-left font-medium text-foreground;
+    }
+  }
+
+  /* Focus Styles for Accessibility */
+  .focus-clinical {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  /* Loading Skeleton */
+  .skeleton {
+    @apply bg-muted animate-pulse rounded;
+  }
+  
+  .skeleton-text {
+    @apply skeleton h-4 mb-2;
+  }
+  
+  .skeleton-title {
+    @apply skeleton h-6 mb-4 w-3/4;
+  }
+  
+  .skeleton-avatar {
+    @apply skeleton w-10 h-10 rounded-full;
+  }
+
+  /* Enhanced Drag and Drop Utilities */
+  .drag-handle {
+    @apply cursor-grab active:cursor-grabbing;
+  }
+
+  .drag-preview {
+    @apply opacity-50 scale-95 rotate-2 shadow-xl;
+  }
+.drop-zone-active  {
+    @apply border-2 border-dashed border-primary;
+  }
+.element-selected  {
+    @apply ring-2 ring-primary ring-offset-2;
+  }
+
+  .resize-handle {
+    @apply absolute w-3 h-3 bg-primary border-2 border-white rounded-full shadow-md hover:scale-125 transition-transform;
+  }
+
+  /* Transition Layout for Responsive Sidebar */
+  .transition-layout {
+    @apply transition-all duration-300 ease-in-out;
+  }
+}
+
+/* Scrollbar Styling */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E0 #F7FAFC;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #F7FAFC;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #CBD5E0;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #A0AEC0;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-before: always;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .card-mobile {
+    @apply border-2;
+  }
+  
+  .shadow-clinical,
+  .shadow-clinical-lg {
+    box-shadow: none;
+    @apply border border-border;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .transition-clinical {
+    transition: none;
+  }
+  
+  .animate-spin {
+    animation: none;
+  }
+  
+  .animate-shrink {
+    animation: none;
+  }
+
+  .animate-bounce {
+    animation: none;
+  }
+}
+
+/* New animation keyframes for enhanced landing page */
+@keyframes slideInUp {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2); }
+}
+
+/* Animation classes */
+.animate-slideInUp {
+  animation: slideInUp 0.8s ease-out forwards;
+}
+
+.animate-typewriter {
+  overflow: hidden;
+  border-right: 2px solid rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  animation: typewriter 3s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: rgba(255, 255, 255, 0.7); }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+/* Animation delay utilities */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+.animation-delay-800 {
+  animation-delay: 800ms;
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced gradient backgrounds */
+.bg-gradient-animated {
+  background: linear-gradient(-45deg, #10B981, #F59E0B, #1E3A5F, #475569);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* Interactive button enhancements */
+.btn-interactive {
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-interactive:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-interactive:hover:before {
+  left: 100%;
+}
+
+/* Scroll reveal animations */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Enhanced card hover effects */
+.card-enhanced {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.card-enhanced:hover {
+  transform: translateY(-12px) rotateX(5deg) rotateY(2deg);
+  box-shadow: 
+    0 24px 48px rgba(0, 0, 0, 0.15),
+    0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Testimonial animation */
+.testimonial-slide {
+  animation: slideInUp 0.6s ease-out;
+}
+
+/* Enhanced ripple effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.ripple:hover:before {
+  width: 300px;
+  height: 300px;
+}
