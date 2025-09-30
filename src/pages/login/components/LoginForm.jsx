@@ -1,200 +1,225 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
-import { setAuthState, authenticateUser } from '../../../utils/auth';
 
-const LoginForm = () => {
+const LoginForm = ({ className = '' }) => {
   const navigate = useNavigate();
+  const { signIn, loading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e?.target;
+    const { name, value } = e?.target || {};
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-    
-    // Clear error when user starts typing
-    if (errors?.[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData?.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/?.test(formData?.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    
-    if (!formData?.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData?.password?.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors)?.length === 0;
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
     
-    if (!validateForm()) return;
-    
-    setIsLoading(true);
-    
-    // Simulate API call delay
-    setTimeout(() => {
-      // Use the new authentication utility
-      const authenticatedUser = authenticateUser(formData?.email, formData?.password);
+    if (!formData?.email || !formData?.password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const { error } = await signIn(formData?.email, formData?.password);
       
-      if (authenticatedUser) {
-        // Successful login - use auth utility
-        const userData = {
-          email: authenticatedUser?.email,
-          additionalData: {
-            name: authenticatedUser?.name,
-            role: authenticatedUser?.role,
-            department: authenticatedUser?.department,
-            id: authenticatedUser?.id,
-            loginTime: new Date()?.toISOString()
-          }
-        };
-        
-        setAuthState(userData);
-        navigate('/dashboard');
-        
+      if (error) {
+        setError(error?.message || 'Login failed. Please try again.');
       } else {
-        // Failed login - show available credentials for demo
-        setErrors({
-          general: 'Invalid credentials. Available accounts: dr.sarah@evolvehealth.com or lauren.carvell@evolve.com.au'
-        });
+        navigate('/dashboard');
       }
-      setIsLoading(false);
-    }, 1500);
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleForgotPassword = () => {
-    // Navigate to forgot password or show modal
-    alert('Password reset link would be sent to your email');
+  // Quick login with demo credentials
+  const handleDemoLogin = (email, password) => {
+    setFormData({ email, password });
   };
 
-  const handleCreateAccount = () => {
-    navigate('/register');
-  };
+  const isLoading = loading || isSubmitting;
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-card border border-border rounded-lg shadow-clinical-lg p-8">
-        {/* Logo and Header */}
+    <div className={`w-full max-w-md mx-auto ${className}`}>
+      <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+        {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-              <Icon name="Heart" size={24} color="white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4">
+            <Icon name="Stethoscope" size={32} className="text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+          <p className="text-gray-600">Sign in to your Evolve Health account</p>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-red-800">
+              <Icon name="AlertCircle" size={16} />
+              <span>{error}</span>
             </div>
           </div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">Welcome Back</h1>
-          <p className="text-sm text-muted-foreground">
-            Sign in to your HIPAA-compliant healthcare platform
-          </p>
+        )}
+
+        {/* Demo Credentials Section */}
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h3 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
+            <Icon name="Key" size={16} />
+            Demo Credentials
+          </h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between p-2 bg-white rounded border">
+              <span className="text-gray-700">
+                <strong>Admin:</strong> admin@evolvehealth.com
+              </span>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('admin@evolvehealth.com', 'admin123')}
+                className="text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Use
+              </button>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-white rounded border">
+              <span className="text-gray-700">
+                <strong>Doctor:</strong> doctor@evolvehealth.com
+              </span>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin('doctor@evolvehealth.com', 'doctor123')}
+                className="text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Use
+              </button>
+            </div>
+            <p className="text-xs text-blue-700 italic">Password for both: see migration file</p>
+          </div>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* General Error */}
-          {errors?.general && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3">
-              <div className="flex items-center">
-                <Icon name="AlertCircle" size={16} className="text-red-600 mr-2" />
-                <p className="text-sm text-red-700">{errors?.general}</p>
-              </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <div className="relative">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData?.email}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 pl-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                placeholder="Enter your email"
+                disabled={isLoading}
+              />
+              <Icon name="Mail" size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
-          )}
-
-          {/* Email Input */}
-          <Input
-            label="Email Address"
-            type="email"
-            name="email"
-            placeholder="Enter your professional email"
-            value={formData?.email}
-            onChange={handleInputChange}
-            error={errors?.email}
-            required
-            className="w-full"
-          />
-
-          {/* Password Input */}
-          <div className="relative">
-            <Input
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Enter your password"
-              value={formData?.password}
-              onChange={handleInputChange}
-              error={errors?.password}
-              required
-              className="w-full"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-9 text-muted-foreground hover:text-foreground transition-clinical"
-            >
-              <Icon name={showPassword ? "EyeOff" : "Eye"} size={16} />
-            </button>
           </div>
 
-          {/* Sign In Button */}
-          <Button
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={formData?.password}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 pl-11 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                placeholder="Enter your password"
+                disabled={isLoading}
+              />
+              <Icon name="Lock" size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                disabled={isLoading}
+              >
+                <Icon name={showPassword ? 'EyeOff' : 'Eye'} size={18} />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label className="flex items-center">
+              <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              <span className="ml-2 text-sm text-gray-600">Remember me</span>
+            </label>
+            <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+              Forgot password?
+            </Link>
+          </div>
+
+          <button
             type="submit"
-            variant="default"
-            loading={isLoading}
-            fullWidth
-            className="w-full"
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Signing In...' : 'Sign In'}
-          </Button>
-
-          {/* Additional Links */}
-          <div className="flex items-center justify-between text-sm">
-            <button
-              type="button"
-              onClick={handleForgotPassword}
-              className="text-primary hover:text-primary/80 transition-clinical"
-            >
-              Forgot Password?
-            </button>
-            <button
-              type="button"
-              onClick={handleCreateAccount}
-              className="text-primary hover:text-primary/80 transition-clinical"
-            >
-              Create Account
-            </button>
-          </div>
+            {isLoading ? (
+              <>
+                <Icon name="Loader2" size={18} className="animate-spin" />
+                <span>Signing In...</span>
+              </>
+            ) : (
+              <>
+                <Icon name="LogIn" size={18} />
+                <span>Sign In</span>
+              </>
+            )}
+          </button>
         </form>
 
-        {/* Security Notice */}
-        <div className="mt-6 pt-6 border-t border-border">
-          <div className="flex items-center justify-center text-xs text-muted-foreground">
-            <Icon name="Shield" size={14} className="mr-1" />
-            <span>Protected by 256-bit SSL encryption</span>
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-gray-600 text-sm">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium">
+              Create Account
+            </Link>
+          </p>
+        </div>
+
+        {/* Features Preview */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <h4 className="text-sm font-medium text-gray-900 mb-3">🚀 New Features Available</h4>
+          <div className="space-y-2 text-xs text-gray-600">
+            <div className="flex items-center gap-2">
+              <Icon name="FileText" size={12} className="text-green-600" />
+              <span>Advanced PDF Document Processing</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Icon name="Database" size={12} className="text-blue-600" />
+              <span>Secure Cloud Storage with Supabase</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Icon name="Sparkles" size={12} className="text-purple-600" />
+              <span>AI-Powered Document Enhancement</span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Add CSS layer for sidebar interaction fixes */
 @layer utilities {
@@ -658,4 +658,381 @@
 .ripple:hover:before {
   width: 300px;
   height: 300px;
+}
+
+/* PDF Document Styles for TipTap Editor - Enhanced Secure Version */
+.pdf-document-container {
+  @apply max-w-5xl mx-auto p-6 font-serif;
+}
+
+.pdf-header-section h2 {
+  @apply text-2xl font-bold text-gray-800 mb-4 flex items-center gap-3;
+}
+
+.pdf-import-success {
+  @apply bg-green-50 border border-green-200 rounded-lg p-4 mb-6;
+}
+
+.pdf-import-success p:first-child {
+  @apply text-green-800 font-medium mb-2;
+}
+
+.pdf-import-success p:last-child {
+  @apply text-green-600 text-sm;
+}
+
+/* PDF Viewer Section Styles */
+.pdf-viewer-section {
+  @apply border border-gray-200 rounded-xl mb-8 overflow-hidden shadow-lg bg-white;
+}
+
+.pdf-viewer-header {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center;
+}
+
+.pdf-viewer-header h3 {
+  @apply text-lg font-semibold text-blue-700 m-0;
+}
+
+.pdf-viewer-controls {
+  @apply flex items-center gap-2;
+}
+
+.pdf-control-btn {
+  @apply text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 cursor-pointer transition-colors;
+}
+
+.pdf-embed-container {
+  @apply relative bg-gray-50 p-4;
+  min-height: 600px;
+}
+
+.pdf-embed-object {
+  @apply w-full h-full min-h-[600px] border border-gray-300 rounded-lg bg-white shadow-inner;
+}
+
+/* PDF Fallback Styles */
+.pdf-fallback {
+  @apply w-full h-full min-h-[600px] flex flex-col items-center justify-center;
+}
+
+.pdf-fallback-content {
+  @apply text-center mb-6 p-6 bg-white border border-gray-300 rounded-lg shadow-sm;
+}
+
+.pdf-fallback-content h4 {
+  @apply text-lg font-semibold text-gray-800 mb-3;
+}
+
+.pdf-fallback-content p {
+  @apply text-gray-600 mb-4;
+}
+
+.pdf-fallback-buttons {
+  @apply flex flex-col sm:flex-row gap-3 justify-center items-center;
+}
+.pdf-fallback-btn  {
+  @apply px-4 py-2 rounded-lg font-medium text-sm transition-colors;
+}
+
+.pdf-fallback-btn.primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.pdf-fallback-btn.secondary {
+  @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+}
+
+.pdf-fallback-note {
+  @apply text-xs text-gray-500 mt-3;
+}
+
+.pdf-iframe {
+  @apply w-full min-h-[500px] border border-gray-300 rounded-lg bg-white;
+}
+
+/* PDF Notes Section */
+.pdf-notes-main-section {
+  @apply border border-gray-200 rounded-xl mb-8 overflow-hidden shadow-lg bg-white;
+}
+
+.pdf-notes-main-section h3 {
+  @apply text-xl font-bold text-gray-800 p-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-yellow-50 to-amber-50;
+}
+
+.pdf-notes-area {
+  @apply p-6 bg-gradient-to-br from-yellow-50 to-amber-50;
+}
+
+.pdf-notes-area h4 {
+  @apply text-lg font-semibold text-amber-800 mb-3 flex items-center gap-2;
+}
+
+.pdf-notes-area p {
+  @apply mb-3 text-gray-700 leading-relaxed cursor-text;
+}
+
+.pdf-notes-area p:last-child {
+  @apply text-gray-500 italic;
+}
+
+.pdf-notes-area p strong {
+  @apply font-semibold text-amber-900;
+}
+
+/* Enhanced completion section */
+.pdf-completion {
+  @apply bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-8 text-center mt-8;
+}
+
+.pdf-completion h3 {
+  @apply text-xl font-bold text-green-800 mb-4;
+}
+
+.pdf-completion p {
+  @apply text-green-700 mb-2;
+}
+
+.pdf-completion p strong {
+  @apply font-semibold text-green-900;
+}
+
+/* Enhanced error styles */
+.pdf-error-page, .pdf-error {
+  @apply border-2 border-red-200 bg-red-50 rounded-xl p-6 mb-6;
+}
+
+.pdf-error-page h4, .pdf-error h3 {
+  @apply text-red-800 font-semibold mb-3;
+}
+
+.pdf-error-page p, .pdf-error p {
+  @apply text-red-700 mb-2;
+}
+
+/* Responsive PDF viewer */
+@media (max-width: 768px) {
+  .pdf-embed-container {
+    min-height: 400px;
+  }
+  
+  .pdf-embed-object {
+    min-height: 400px;
+  }
+  
+  .pdf-fallback {
+    min-height: 400px;
+  }
+  
+  .pdf-iframe {
+    min-height: 350px;
+  }
+  
+  .pdf-viewer-header {
+    @apply flex-col items-start gap-3;
+  }
+  
+  .pdf-viewer-controls {
+    @apply w-full justify-between;
+  }
+  
+  .pdf-fallback-buttons {
+    @apply flex-col w-full;
+  }
+  
+  .pdf-fallback-btn {
+    @apply w-full text-center;
+  }
+}
+
+/* Print optimization for PDF content */
+@media print {
+  .pdf-embed-container,
+  .pdf-fallback {
+    @apply break-inside-avoid;
+  }
+  
+  .pdf-control-btn,
+  .pdf-fallback-btn {
+    display: none !important;
+  }
+}
+
+/* Enhanced PDF Processing Styles - Advanced Version */
+.pdf-document-processed {
+  @apply max-w-6xl mx-auto p-6 font-serif;
+}
+
+.pdf-header-info h2 {
+  @apply text-3xl font-bold text-gray-800 mb-4 flex items-center gap-3;
+}
+
+.pdf-success-banner {
+  @apply bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 mb-8 shadow-md;
+}
+
+.pdf-success-banner p:first-child {
+  @apply text-green-800 font-bold text-lg mb-3;
+}
+
+.pdf-success-banner p:last-child {
+  @apply text-green-700 text-base;
+}
+
+/* PDF Page Section Styles */
+.pdf-page-section {
+  @apply border-2 border-gray-200 rounded-2xl mb-12 overflow-hidden shadow-lg bg-white;
+}
+
+.pdf-page-header {
+  @apply bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b-2 border-gray-200 flex justify-between items-center;
+}
+
+.pdf-page-header h3 {
+  @apply text-xl font-bold text-blue-800 m-0;
+}
+
+.pdf-page-info {
+  @apply text-sm text-blue-600 bg-blue-100 px-3 py-1 rounded-full;
+}
+
+.pdf-page-image-container {
+  @apply p-6 bg-gray-50 text-center;
+}
+
+.pdf-page-image {
+  @apply mx-auto max-w-full shadow-xl rounded-lg border-4 border-gray-300;
+}
+
+/* PDF Text Editor Sections */
+.pdf-page-text-editor {
+  @apply p-6;
+}
+
+.pdf-page-text-editor h4 {
+  @apply text-lg font-bold text-gray-800 mb-4 flex items-center gap-2;
+}
+
+.pdf-extracted-text {
+  @apply bg-slate-50 border-2 border-slate-200 rounded-xl p-6 mb-6;
+}
+
+.pdf-extracted-text p:first-child {
+  @apply font-semibold text-slate-800 mb-3;
+}
+
+.pdf-extracted-text p:last-child {
+  @apply text-slate-700 leading-relaxed;
+}
+
+.pdf-notes-section {
+  @apply bg-yellow-50 border-2 border-yellow-200 rounded-xl p-6;
+}
+
+.pdf-notes-section h5 {
+  @apply text-base font-bold text-yellow-800 mb-3;
+}
+
+.pdf-notes-section p {
+  @apply text-yellow-700 mb-3;
+}
+
+.pdf-notes-section ul {
+  @apply list-disc list-inside space-y-2 text-yellow-700;
+}
+
+.pdf-notes-section li {
+  @apply cursor-text hover:bg-yellow-100 p-2 rounded transition-colors;
+}
+
+/* Enhanced completion section */
+.pdf-completion-section  {
+  @apply bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 rounded-2xl p-8 text-center mt-12;
+}
+
+.pdf-completion-section h3 {
+  @apply text-2xl font-bold text-green-800 mb-6;
+}
+
+.pdf-completion-section p {
+  @apply text-green-700 mb-4;
+}
+
+.pdf-completion-section ul {
+  @apply text-left list-disc list-inside space-y-3 text-green-700 max-w-2xl mx-auto;
+}
+
+.pdf-completion-section li {
+  @apply leading-relaxed;
+}
+
+.pdf-completion-section p strong {
+  @apply font-bold text-green-900;
+}
+
+/* Enhanced error styles */
+.pdf-error-section  {
+  @apply border-red-200 bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-8 mb-8;
+}
+
+.pdf-error-section h3 {
+  @apply text-red-800 font-bold text-xl mb-4;
+}
+
+.pdf-error-section p {
+  @apply text-red-700 mb-3;
+}
+
+.pdf-error-section hr {
+  @apply my-6 border-red-300 border-2;
+}
+
+/* Responsive adjustments for PDF processing */
+@media (max-width: 768px) {
+  .pdf-page-section {
+    @apply border border-gray-300 rounded-xl mb-8;
+  }
+  
+  .pdf-page-header {
+    @apply flex-col items-start gap-3 px-4 py-3;
+  }
+  
+  .pdf-page-image-container {
+    @apply p-3;
+  }
+  
+  .pdf-page-text-editor {
+    @apply p-4;
+  }
+  
+  .pdf-extracted-text {
+    @apply p-4 text-sm;
+  }
+  
+  .pdf-notes-section {
+    @apply p-4 text-sm;
+  }
+  
+  .pdf-completion-section {
+    @apply p-6 text-sm;
+  }
+  
+  .pdf-error-section {
+    @apply p-6 text-sm;
+  }
+}
+
+/* Print optimization for processed PDF content */
+@media print {
+  .pdf-page-section {
+    @apply break-inside-avoid mb-8;
+  }
+  
+  .pdf-page-image {
+    @apply max-w-full;
+  }
+  
+  .pdf-notes-section {
+    @apply break-inside-avoid;
+  }
 }

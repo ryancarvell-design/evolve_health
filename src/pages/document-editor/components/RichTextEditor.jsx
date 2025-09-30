@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-
 import Icon from '../../../components/AppIcon';
 import { getPatients } from '../../../utils/patientRegistry';
+import TipTapEditor from '../../../components/ui/TipTapEditor';
 
 const RichTextEditor = ({
   content = '',
@@ -11,25 +11,23 @@ const RichTextEditor = ({
   isA4Format = true,
   isMobile = false,
   isTablet = false,
-  onElementInsert // Add this new prop
+  onElementInsert
 }) => {
-  const editorRef = useRef(null);
   const [currentFormat, setCurrentFormat] = useState({});
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Patient selection states - added per requirements
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [selectedDocumentType, setSelectedDocumentType] = useState('');
   const [patients, setPatients] = useState([]);
-
-  // Add missing state declarations
   const [showTemplateHelper, setShowTemplateHelper] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedText, setSelectedText] = useState('');
 
-  // Document types for healthcare - Enhanced per requirements
+  // New state for editor mode
+  const [editorMode, setEditorMode] = useState('tiptap'); // 'tiptap' or 'classic'
+
+  // Keep existing document types array
   const documentTypes = [
     'General Progress Note',
     'Consultation Report', 
@@ -61,41 +59,16 @@ const RichTextEditor = ({
     setPatients(patientData);
   }, []);
 
-  // Update word and character counts whenever content changes - Enhanced per requirements
+  // Update word and character counts whenever content changes
   useEffect(() => {
     if (content) {
-      // Count words (split by spaces and filter empty strings)
       const words = content?.trim()?.split(/\s+/)?.filter(word => word?.length > 0);
       setWordCount(words?.length);
-      
-      // Count characters (excluding HTML tags if any)
       const plainText = content?.replace(/<[^>]*>/g, '');
       setCharacterCount(plainText?.length);
-      
-      // Update counters in document header if they exist
-      const wordCounterElement = document.getElementById('word-counter');
-      const charCounterElement = document.getElementById('character-counter');
-      
-      if (wordCounterElement) {
-        wordCounterElement.textContent = words?.length?.toString();
-      }
-      if (charCounterElement) {
-        charCounterElement.textContent = plainText?.length?.toString();
-      }
     } else {
       setWordCount(0);
       setCharacterCount(0);
-      
-      // Reset counters in document header
-      const wordCounterElement = document.getElementById('word-counter');
-      const charCounterElement = document.getElementById('character-counter');
-      
-      if (wordCounterElement) {
-        wordCounterElement.textContent = '0';
-      }
-      if (charCounterElement) {
-        charCounterElement.textContent = '0';
-      }
     }
   }, [content]);
 
@@ -110,63 +83,13 @@ const RichTextEditor = ({
     }
   }, [templateSections]);
 
-  // Initialize with template content or placeholder
-  useEffect(() => {
-    if (content && editorRef?.current) {
-      editorRef.current.value = content;
-      updateWordCount(content);
-    } else if (!content && !editorRef?.current?.value) {
-      const placeholderContent = templateSections 
-        ? "Your template has been loaded. Start editing or add more sections using the helper above..." :"Start writing your document...";
-      setDocumentContent(placeholderContent);
-    }
-  }, [content, templateSections]);
-
-  const setDocumentContent = (newContent) => {
-    if (editorRef?.current) {
-      editorRef.current.value = newContent;
-      updateWordCount(newContent);
-      onChange?.(newContent);
-    }
-  };
-
-  const updateWordCount = (text) => {
-    const plainText = text?.replace(/<[^>]*>/g, '') || '';
-    const words = plainText?.trim()?.split(/\s+/)?.filter(word => word?.length > 0);
-    const chars = plainText?.length;
-    
-    setWordCount(words?.length || 0);
-    setCharacterCount(chars);
-    
-    // Estimate page count (approximate 250 words per page)
-    const estimatedPages = Math.max(1, Math.ceil((words?.length || 0) / 250));
-    setCurrentPage(estimatedPages);
-  };
-
-  const handleInput = (e) => {
-    const content = e?.target?.value;
-    updateWordCount(content);
-    onChange?.(content);
-  };
-
-  const handleSelection = (e) => {
-    const selection = e?.target?.selectionStart !== e?.target?.selectionEnd 
-      ? e?.target?.value?.substring(e?.target?.selectionStart, e?.target?.selectionEnd)
-      : '';
-    setSelectedText(selection);
-    onSelectionChange?.(selection);
-  };
-
   const handlePatientSelect = (e) => {
     const selectedPatientId = e?.target?.value;
     const patient = patients?.find(p => p?.id === selectedPatientId);
     setSelectedPatient(patient);
     
-    // Call parent onChange to save metadata
     if (patient && onChange) {
-      // This will trigger the metadata save through the parent component
-      const currentContent = editorRef?.current?.value || content || '';
-      onChange?.(currentContent, {
+      onChange?.(content || '', {
         patientInfo: {
           id: patient?.id,
           name: `${patient?.firstName} ${patient?.lastName}`,
@@ -183,52 +106,13 @@ const RichTextEditor = ({
     const selectedType = e?.target?.value;
     setSelectedDocumentType(selectedType);
     
-    // Call parent onChange to save metadata
     if (selectedType && onChange) {
-      const currentContent = editorRef?.current?.value || content || '';
-      onChange?.(currentContent, {
+      onChange?.(content || '', {
         documentType: selectedType,
         selectedAt: new Date()?.toISOString()
       });
     }
   };
-
-  // Add method to handle element insertion
-  const insertElement = (elementText) => {
-    if (editorRef?.current) {
-      const editor = editorRef?.current;
-      const currentContent = editor?.innerHTML || '';
-      const selection = window?.getSelection();
-      
-      if (selection && selection?.rangeCount > 0) {
-        const range = selection?.getRangeAt(0);
-        const textNode = document?.createTextNode(elementText);
-        range?.insertNode(textNode);
-        
-        // Move cursor after inserted text
-        range?.setStartAfter(textNode);
-        range?.setEndAfter(textNode);
-        selection?.removeAllRanges();
-        selection?.addRange(range);
-        
-        // Trigger onChange with updated content
-        onChange?.(editor?.innerHTML, { type: 'insert', element: elementText });
-      } else {
-        // If no selection, append to end
-        const newContent = currentContent + elementText;
-        editor.innerHTML = newContent;
-        onChange?.(newContent, { type: 'insert', element: elementText });
-      }
-    }
-  };
-
-  // Expose insertElement method via ref or callback
-  useEffect(() => {
-    if (onElementInsert) {
-      // Store the insert function for external use
-      window.documentEditorInsertElement = insertElement;
-    }
-  }, [onElementInsert]);
 
   const insertTemplateSection = (section) => {
     let sectionContent = `\n## ${section?.title}\n\n`;
@@ -248,27 +132,65 @@ const RichTextEditor = ({
     sectionContent += '---\n\n';
     
     const newContent = (content || '') + sectionContent;
-    setDocumentContent(newContent);
+    onChange?.(newContent);
   };
 
-  const insertQuickTemplate = (templateType) => {
-    const templates = {
-      header: `# Document Title\n\n**Date:** ${new Date()?.toLocaleDateString()}\n**Author:** [Your Name]\n\n---\n\n`,
-      section: `## Section Title\n\n[Section content goes here...]\n\n`,
-      list: `### Key Points:\n\n- Point 1\n- Point 2\n- Point 3\n\n`,
-      table: `| Column 1 | Column 2 | Column 3 |\n|----------|----------|----------|\n| Data 1   | Data 2   | Data 3   |\n| Data 4   | Data 5   | Data 6   |\n\n`,
-      signature: `\n---\n\n**Signature:** ________________________\n\n**Name:** [Print Name]\n\n**Title:** [Title]\n\n**Date:** ${new Date()?.toLocaleDateString()}\n`
-    };
+  // Enhanced content change handler for TipTap
+  const handleTipTapChange = (newContent) => {
+    onChange?.(newContent);
+  };
 
-    const templateContent = templates?.[templateType] || '';
-    const newContent = (content || '') + templateContent;
-    setDocumentContent(newContent);
+  const handleTipTapSelection = (selectedText) => {
+    setSelectedText(selectedText);
+    onSelectionChange?.(selectedText);
   };
 
   return (
     <div className={`flex flex-col h-full ${isA4Format ? 'bg-white' : 'bg-gray-50'}`}>
-      {/* Enhanced Editor Controls - Patient & Document Type Selection per requirements */}
+      {/* Enhanced Editor Controls */}
       <div className="border-b border-gray-200 p-3 sm:p-4 bg-gray-50">
+        {/* Mode Toggle */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">Editor Mode:</span>
+            <div className="flex bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setEditorMode('tiptap')}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  editorMode === 'tiptap' ?'bg-blue-600 text-white' :'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                TipTap (Modern)
+              </button>
+              <button
+                onClick={() => setEditorMode('classic')}
+                className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  editorMode === 'classic' ?'bg-blue-600 text-white' :'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Classic
+              </button>
+            </div>
+          </div>
+          
+          {/* Word and Character Counters */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded text-xs sm:text-sm">
+              <Icon name="FileText" size={12} className="text-blue-600" />
+              <span className="text-blue-700 font-medium">
+                <strong>{wordCount}</strong> words
+              </span>
+            </div>
+            <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs sm:text-sm">
+              <Icon name="Type" size={12} className="text-green-600" />
+              <span className="text-green-700 font-medium">
+                <strong>{characterCount}</strong> chars
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Patient and Document Type Selection */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
           {/* Patient Selection */}
           <div className="space-y-2">
@@ -296,7 +218,7 @@ const RichTextEditor = ({
             )}
           </div>
 
-          {/* Document Type Selection - Enhanced per requirements */}
+          {/* Document Type Selection */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
               Document Type <span className="text-red-500">*</span>
@@ -316,25 +238,7 @@ const RichTextEditor = ({
           </div>
         </div>
 
-        {/* Formatting Toolbar - Mobile Optimized */}
-        
-        {/* Enhanced Word and Character Counters - Made functional per requirements */}
-        <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-          <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded text-xs sm:text-sm">
-            <Icon name="FileText" size={12} className="text-blue-600" />
-            <span className="text-blue-700 font-medium">
-              <strong>{wordCount}</strong> words
-            </span>
-          </div>
-          <div className="flex items-center gap-1 bg-green-50 px-2 py-1 rounded text-xs sm:text-sm">
-            <Icon name="Type" size={12} className="text-green-600" />
-            <span className="text-green-700 font-medium">
-              <strong>{characterCount}</strong> chars
-            </span>
-          </div>
-        </div>
-
-        {/* Show template helper if template sections are available */}
+        {/* Template Helper */}
         {showTemplateHelper && templateSections && (
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
@@ -366,34 +270,52 @@ const RichTextEditor = ({
           </div>
         )}
       </div>
-      {/* Main Editor Area */}
+
+      {/* Editor Content - Conditional Rendering */}
       <div className="flex-1 relative">
-        <div className={`h-full ${isA4Format ? 'p-12' : 'p-6'}`}>
-          <textarea
-            ref={editorRef}
-            value={content || ''}
-            onChange={handleInput}
-            onSelect={handleSelection}
-            className={`w-full h-full border-0 resize-none focus:outline-none bg-transparent ${
-              isA4Format 
-                ? 'text-base leading-7 font-serif' 
-                : 'text-sm leading-relaxed font-mono'
-            }`}
-            placeholder={
-              templateSections 
-                ? "Your template has been loaded. Start editing or add more sections using the helper above..." :"Start writing your document..."
-            }
-            style={{ 
-              minHeight: isA4Format ? '265mm' : '100%',
-              fontFamily: isA4Format ? 'Georgia, "Times New Roman", serif' : 'ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace'
-            }}
+        {editorMode === 'tiptap' ? (
+          <TipTapEditor
+            content={content}
+            onChange={handleTipTapChange}
+            onSelectionChange={handleTipTapSelection}
+            isMobile={isMobile}
+            className="h-full"
           />
-        </div>
+        ) : (
+          <div className={`h-full ${isA4Format ? 'p-12' : 'p-6'}`}>
+            <textarea
+              value={content || ''}
+              onChange={(e) => onChange?.(e?.target?.value)}
+              onSelect={(e) => {
+                const selection = e?.target?.selectionStart !== e?.target?.selectionEnd 
+                  ? e?.target?.value?.substring(e?.target?.selectionStart, e?.target?.selectionEnd)
+                  : '';
+                setSelectedText(selection);
+                onSelectionChange?.(selection);
+              }}
+              className={`w-full h-full border-0 resize-none focus:outline-none bg-transparent ${
+                isA4Format 
+                  ? 'text-base leading-7 font-serif' 
+                  : 'text-sm leading-relaxed font-mono'
+              }`}
+              placeholder={
+                templateSections 
+                  ? "Your template has been loaded. Start editing or add more sections using the helper above..." :"Start writing your document..."
+              }
+              style={{ 
+                minHeight: isA4Format ? '265mm' : '100%',
+                fontFamily: isA4Format ? 'Georgia, "Times New Roman", serif' : 'ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, "DejaVu Sans Mono", monospace'
+              }}
+            />
+          </div>
+        )}
       </div>
-      {/* Enhanced Status Bar - Updated per requirements */}
+
+      {/* Enhanced Status Bar */}
       <div className="border-t border-gray-200 px-3 sm:px-4 py-2 bg-gray-50 text-xs text-gray-600">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
+            <span>Mode: <strong className="text-gray-900">{editorMode === 'tiptap' ? 'TipTap' : 'Classic'}</strong></span>
             <span>Document: <strong className="text-gray-900">{selectedDocumentType || 'Not selected'}</strong></span>
             {selectedPatient && (
               <span>Patient: <strong className="text-gray-900">{selectedPatient?.firstName} {selectedPatient?.lastName}</strong></span>
@@ -402,7 +324,7 @@ const RichTextEditor = ({
           <div className="flex items-center gap-4">
             <span>Words: <strong className="text-gray-900">{wordCount}</strong></span>
             <span>Characters: <strong className="text-gray-900">{characterCount}</strong></span>
-            <span className="text-green-600">● Auto-save enabled</span>
+            <span className="text-green-600">● {editorMode === 'tiptap' ? 'AI-Enhanced' : 'Auto-save'} enabled</span>
           </div>
         </div>
       </div>

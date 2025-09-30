@@ -256,3 +256,103 @@ export async function chatWithHistory(message, history = []) {
     throw error;
   }
 }
+
+// Enhanced AI functions for TipTap integration
+
+/**
+ * Enhances text with AI-powered writing assistance (using Gemini instead of OpenAI for now)
+ * @param {string} text - Current document text
+ * @param {string} action - Action to perform ('rewrite', 'improve', 'shorten', 'expand')
+ * @returns {Promise<string>} Enhanced text
+ */
+export async function enhanceText(text, action = 'improve') {
+  const actionPrompts = {
+    rewrite: 'Please rewrite this text to be clearer and more professional while maintaining the original meaning:',
+    improve: 'Please improve this text by enhancing clarity, flow, and professional tone:',
+    shorten: 'Please make this text more concise while keeping all important information:',
+    expand: 'Please expand this text with more detail and supporting information:'
+  };
+
+  try {
+    const prompt = `${actionPrompts?.[action] || actionPrompts?.improve}
+
+${text}
+
+Enhanced text:`;
+
+    const model = genAI?.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 2000,
+      }
+    });
+    
+    const result = await model?.generateContent(prompt);
+    const response = await result?.response;
+    return response?.text();
+  } catch (error) {
+    console.error('Error enhancing text:', error);
+    throw error;
+  }
+}
+
+/**
+ * Generates medical content based on specific prompts
+ * @param {string} contentType - Type of content to generate
+ * @param {Object} parameters - Parameters for content generation
+ * @returns {Promise<string>} Generated content
+ */
+export async function generateMedicalContent(contentType, parameters = {}) {
+  const contentPrompts = {
+    'assessment': 'Generate a professional medical assessment section based on the following information:',
+    'plan': 'Create a comprehensive treatment plan section with the following details:',
+    'diagnosis': 'Write a diagnostic impression section using this information:',
+    'history': 'Generate a patient history section from the provided details:'
+  };
+
+  try {
+    const prompt = `${contentPrompts?.[contentType] || contentPrompts?.assessment}
+
+${JSON.stringify(parameters, null, 2)}
+
+Please format this as professional medical documentation suitable for clinical records.
+
+Generated content:`;
+
+    const model = genAI?.getGenerativeModel({ 
+      model: 'gemini-1.5-pro',
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 1500,
+      }
+    });
+    
+    const result = await model?.generateContent(prompt);
+    const response = await result?.response;
+    return response?.text();
+  } catch (error) {
+    console.error('Error generating medical content:', error);
+    throw error;
+  }
+}
+
+/**
+ * TODO: OpenAI Integration (for when API key is provided)
+ * Placeholder for future OpenAI integration - currently using Gemini
+ */
+export async function enhanceTextWithOpenAI(text, action = 'improve') {
+  // This function will be implemented when OpenAI API key is provided
+  console.warn('OpenAI integration not available - API key skipped as requested. Using Gemini instead.');
+  return enhanceText(text, action);
+}
+
+/**
+ * TODO: OpenAI Chat Integration (for when API key is provided)
+ * Placeholder for future OpenAI chat integration - currently using Gemini
+ */
+export async function chatWithOpenAI(message, history = []) {
+  // This function will be implemented when OpenAI API key is provided
+  console.warn('OpenAI chat not available - API key skipped as requested. Using Gemini instead.');
+  return chatWithHistory(message, history);
+}

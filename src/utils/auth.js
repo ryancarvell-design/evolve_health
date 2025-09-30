@@ -3,35 +3,33 @@
  * Handles login, logout, and authentication state management
  */
 
-// Storage keys
+import { supabase } from '../lib/supabase';
+
+// Add this block - Define AUTH_KEYS constant
 const AUTH_KEYS = {
   IS_AUTHENTICATED: 'isAuthenticated',
   USER_EMAIL: 'userEmail',
   USER_DATA: 'userData',
   SESSION_TIMESTAMP: 'sessionTimestamp',
-  PREFERENCES: 'userPreferences',
-  LAST_ACTIVITY: 'lastActivity'
+  LAST_ACTIVITY: 'lastActivity',
+  PREFERENCES: 'preferences'
 };
 
-// Mock user database - In production, this would be handled by a backend service
+// Add this block - Define MOCK_USERS constant
 const MOCK_USERS = {
-  'dr.sarah@evolvehealth.com': {
-    email: 'dr.sarah@evolvehealth.com',
-    password: 'HealthCare2024!',
-    name: 'Dr. Sarah Mitchell',
-    role: 'Healthcare Provider',
-    department: 'Cardiology',
-    id: 'user_001',
-    createdAt: '2024-01-15T08:00:00.000Z'
+  'admin@example.com': {
+    email: 'admin@example.com',
+    password: 'admin123',
+    name: 'Admin User',
+    role: 'admin',
+    department: 'IT'
   },
-  'lauren.carvell@evolve.com.au': {
-    email: 'lauren.carvell@evolve.com.au',
-    password: 'Admin01!',
-    name: 'Lauren Carvell',
-    role: 'Administrator',
-    department: 'Administration',
-    id: 'user_002',
-    createdAt: '2025-01-28T11:19:56.233Z'
+  'user@example.com': {
+    email: 'user@example.com',
+    password: 'user123',
+    name: 'Regular User',
+    role: 'user',
+    department: 'Operations'
   }
 };
 
@@ -41,11 +39,10 @@ const MOCK_USERS = {
  */
 export const isAuthenticated = () => {
   try {
-    const authStatus = localStorage.getItem(AUTH_KEYS?.IS_AUTHENTICATED);
-    return authStatus === 'true';
-  } catch (error) {
-    console.error('Error checking authentication status:', error);
-    return false;
+    const session = supabase?.auth?.getSession()
+    return !!session?.data?.session?.user
+  } catch {
+    return false
   }
 };
 
