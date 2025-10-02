@@ -25,10 +25,24 @@ const LoginPage = () => {
   };
 
   useEffect(() => {
-    // Check if user is already authenticated using auth utility
-    if (isAuthenticated()) {
-      navigate('/dashboard', { replace: true });
-    }
+    let isMounted = true;
+
+    const checkAuthentication = async () => {
+      try {
+        const authenticated = await isAuthenticated();
+        if (authenticated && isMounted) {
+          navigate('/dashboard', { replace: true });
+        }
+      } catch (error) {
+        console.error('Failed to verify authentication status:', error);
+      }
+    };
+
+    checkAuthentication();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   return (
