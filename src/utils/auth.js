@@ -37,11 +37,18 @@ const MOCK_USERS = {
  * Check if user is currently authenticated
  * @returns {boolean} Authentication status
  */
-export const isAuthenticated = () => {
+export const isAuthenticated = async () => {
   try {
-    const session = supabase?.auth?.getSession()
-    return !!session?.data?.session?.user
-  } catch {
+    const { data, error } = await supabase?.auth?.getSession()
+
+    if (error) {
+      console.error('Error getting auth session:', error)
+      return false
+    }
+
+    return !!data?.session?.user
+  } catch (error) {
+    console.error('Error checking authentication status:', error)
     return false
   }
 };
@@ -153,9 +160,10 @@ export const performLogout = async (preservePreferences = false) => {
  * Update last activity timestamp
  * Used for session management and timeout detection
  */
-export const updateLastActivity = () => {
+export const updateLastActivity = async () => {
   try {
-    if (isAuthenticated()) {
+    const authenticated = await isAuthenticated()
+    if (authenticated) {
       localStorage.setItem(AUTH_KEYS?.LAST_ACTIVITY, new Date()?.toISOString());
     }
   } catch (error) {
@@ -168,13 +176,14 @@ export const updateLastActivity = () => {
  * @param {number} timeoutMinutes - Session timeout in minutes (default: 480 = 8 hours)
  * @returns {boolean} Whether session has expired
  */
-export const isSessionExpired = (timeoutMinutes = 480) => {
+export const isSessionExpired = async (timeoutMinutes = 480) => {
   try {
-    if (!isAuthenticated()) return true;
-    
+    const authenticated = await isAuthenticated()
+    if (!authenticated) return true;
+
     const lastActivity = localStorage.getItem(AUTH_KEYS?.LAST_ACTIVITY);
     if (!lastActivity) return true;
-    
+
     const lastActivityTime = new Date(lastActivity)?.getTime();
     const currentTime = new Date()?.getTime();
     const timeDifference = currentTime - lastActivityTime;
